@@ -49,7 +49,7 @@ struct block_rule {
 
 static LIST_HEAD(block_list);
 static DEFINE_SPINLOCK(block_lock);
-static unsigned int rule_count;
+static atomic_t rule_count = ATOMIC_INIT(0);
 
 /* Stats */
 static atomic_long_t stat_accepted;
@@ -125,7 +125,7 @@ static int stats_show(struct seq_file *m, void *v)
 {
 	seq_printf(m, "accepted : %ld\n", atomic_long_read(&stat_accepted));
 	seq_printf(m, "dropped  : %ld\n", atomic_long_read(&stat_dropped));
-	seq_printf(m, "rules    : %u\n",  rule_count);
+	seq_printf(m, "rules    : %u\n",  (unsigned int)atomic_read(&rule_count));
 	return 0;
 }
 static int stats_open(struct inode *i, struct file *f)
@@ -170,7 +170,7 @@ static void flush_rules(void)
 		list_del(&rule->node);
 		kfree(rule);
 	}
-	rule_count = 0;
+	atomic_set(&rule_count, 0);
 	spin_unlock_irqrestore(&block_lock, flags);
 }
 
@@ -218,7 +218,7 @@ static ssize_t rules_write(struct file *file, const char __user *ubuf,
 		return (ssize_t)count;
 	}
 
-	if (rule_count >= MAX_RULES) {
+	if ((unsigned int)atomic_read(&rule_count) >= MAX_RULES) {
 		kfree(buf);
 		return -ENOSPC;
 	}
@@ -237,11 +237,17 @@ static ssize_t rules_write(struct file *file, const char __user *ubuf,
 	}
 
 	spin_lock_irqsave(&block_lock, flags);
+	if ((unsigned int)atomic_read(&rule_count) >= MAX_RULES) {
+		spin_unlock_irqrestore(&block_lock, flags);
+		kfree(rule);
+		return -ENOSPC;
+	}
 	list_add_tail(&rule->node, &block_list);
-	rule_count++;
+	atomic_inc(&rule_count);
 	spin_unlock_irqrestore(&block_lock, flags);
 
-	pr_info("netfilter_hook: rule added — total %u\n", rule_count);
+	pr_info("netfilter_hook: rule added — total %u\n",
+		(unsigned int)atomic_read(&rule_count));
 	return (ssize_t)count;
 }
 

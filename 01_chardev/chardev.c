@@ -317,6 +317,7 @@ static int __init chardev_init(void)
 {
 	int ret;
 	dev_t dev;
+	struct device *mymonitor_dev;
 
 	/* Allocate ring buffer */
 	g_ring.size = next_pow2(ring_size);
@@ -352,8 +353,9 @@ static int __init chardev_init(void)
 		pr_err("mymonitor: class_create failed: %d\n", ret);
 		goto err_del_cdev;
 	}
-	if (IS_ERR(device_create(mymonitor_class, NULL, dev, NULL, DEVICE_NAME))) {
-		ret = PTR_ERR(device_create(mymonitor_class, NULL, dev, NULL, DEVICE_NAME));
+	mymonitor_dev = device_create(mymonitor_class, NULL, dev, NULL, DEVICE_NAME);
+	if (IS_ERR(mymonitor_dev)) {
+		ret = PTR_ERR(mymonitor_dev);
 		pr_err("mymonitor: device_create failed\n");
 		goto err_class;
 	}

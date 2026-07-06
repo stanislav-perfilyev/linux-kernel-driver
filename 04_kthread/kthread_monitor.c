@@ -97,7 +97,7 @@ static void snap_work_fn(struct work_struct *work)
 static struct task_struct *kmon_thread;
 static struct workqueue_struct *kmon_wq;
 static atomic_t kmon_running = ATOMIC_INIT(1);
-static unsigned long snap_count;
+static atomic_long_t snap_count = ATOMIC_LONG_INIT(0);
 
 static int kmon_thread_fn(void *data)
 {
@@ -120,7 +120,7 @@ static int kmon_thread_fn(void *data)
 						   * (PAGE_SIZE / 1024);
 			sw->data.total_swap_kb   = si.totalswap * (PAGE_SIZE / 1024);
 			sw->data.free_swap_kb    = si.freeswap  * (PAGE_SIZE / 1024);
-			sw->data.snap_count      = ++snap_count;
+			sw->data.snap_count      = (unsigned long)atomic_long_inc_return(&snap_count);
 			queue_work(kmon_wq, &sw->work);
 		}
 
