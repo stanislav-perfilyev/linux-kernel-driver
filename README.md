@@ -1,6 +1,6 @@
 # Linux Kernel Driver (LKM)
 
-> Portfolio project #15 — four production-quality loadable kernel modules + C++ userspace clients
+> Four production-quality Linux loadable kernel modules with C++ userspace clients
 
 [![CI](https://github.com/stanislav-perfilyev/linux-kernel-driver/actions/workflows/ci.yml/badge.svg)](https://github.com/stanislav-perfilyev/linux-kernel-driver/actions)
 ![Kernel](https://img.shields.io/badge/Linux_Kernel-5.15%2B-blue)
