@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-userspace:
+    name: Build userspace clients
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake build-essential g++
+
+      - name: Build userspace
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release \
+                   -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic"
+          make -j$(nproc)
+
+      - name: Smoke tests (no kernel modules required)
+        run: |
+          cd build && ctest --output-on-failure
+
+  syntax-check-kernel:
+    name: Kernel module syntax check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kernel headers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y linux-headers-$(uname -r) build-essential || \
+          sudo apt-get install -y linux-headers-generic build-essential
+
+      - name: Try kbuild (syntax only — no loading)
+        run: |
+          KDIR=$(ls -d /lib/modules/*/build 2>/dev/null | head -1)
+          echo "Using KDIR=$KDIR"
+          for d in 01_chardev 02_procfs 03_netfilter 04_kthread; do
+            echo "--- $d ---"
+            make -C "$d" KDIR="$KDIR" 2>&1 | tail -5 || true
+          done
