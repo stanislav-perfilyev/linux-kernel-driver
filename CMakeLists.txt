@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Strict warnings
 add_compile_options(
-    -Wall -Wextra -Wpedantic
+    -Wall -Wextra -Wpedantic -Werror
     -Wconversion -Wshadow -Wnull-dereference
     -fno-omit-frame-pointer
 )
@@ -40,4 +40,4 @@ add_test(NAME chardev_client_help
 add_test(NAME procfs_client_missing
          COMMAND sh -c "./procfs_client 2>&1 | grep -q Error || true")
 add_test(NAME kmon_client_missing
-         COMMAND sh -c "./kmon_client 2>&1 | grep -q Error || true")
+         COMMAND sh -c "./kmon_client 2>&1 | grep -q Error ||
