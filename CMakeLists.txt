@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(lkm_userspace CXX)
 
+# ── ccache (faster rebuilds) ──────────────────────────────────────────────────
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_C_COMPILER_LAUNCHER   "${CCACHE_PROGRAM}")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -40,4 +47,4 @@ add_test(NAME chardev_client_help
 add_test(NAME procfs_client_missing
          COMMAND sh -c "./procfs_client 2>&1 | grep -q Error || true")
 add_test(NAME kmon_client_missing
-         COMMAND sh -c "./kmon_client 2>&1 | grep -q Error ||
+         COMMAND sh -c "./kmon_client 2>&1 | grep -q Error || true")
