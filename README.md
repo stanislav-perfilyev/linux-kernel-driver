@@ -116,6 +116,21 @@ cmake --build build -j$(nproc)
 cd build && ctest --output-on-failure
 ```
 
+## Usage
+
+```bash
+# Insert module and run the userspace client
+sudo insmod build/01_chardev/mymonitor.ko
+sudo ./build/userspace/chardev_client /dev/mymonitor
+
+# Check kernel log
+sudo dmesg | tail -20
+
+# Remove module
+sudo rmmod mymonitor
+```
+
+
 ## CI/CD
 
 | Job | What it does |

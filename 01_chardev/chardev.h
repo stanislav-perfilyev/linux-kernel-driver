@@ -13,6 +13,7 @@
 #define MYMONITOR_MAXMSG 256
 
 /* Stats exposed via GET_STATS ioctl */
+/// mymonitor_stats — kernel-reported I/O counters and ring-buffer state.
 struct mymonitor_stats {
 	unsigned long reads;        /* total read() calls */
 	unsigned long writes;       /* total write() calls */

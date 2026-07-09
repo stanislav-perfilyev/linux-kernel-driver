@@ -30,6 +30,8 @@
 
 #define MYMONITOR_MAGIC  'M'
 #define MYMONITOR_MAXMSG 256
+static constexpr int kDefaultPollTimeoutMs = 1000;  ///< default poll timeout (ms)
+static constexpr int kRoundtripPollMs      = 500;   ///< write→read poll timeout (ms)
 
 struct mymonitor_stats {
     unsigned long reads;
@@ -74,7 +76,7 @@ public:
         return n;
     }
 
-    std::string read(size_t max_bytes = 256) {
+    std::string read(size_t max_bytes = MYMONITOR_MAXMSG) {
         std::string buf(max_bytes, '\0');
         ssize_t n = ::read(fd_, buf.data(), max_bytes);
         if (n < 0)
@@ -104,7 +106,7 @@ public:
     }
 
     /* Returns true if data available within timeout_ms */
-    bool poll_readable(int timeout_ms = 1000) {
+    bool poll_readable(int timeout_ms = kDefaultPollTimeoutMs) {
         struct pollfd pfd = { fd_, POLLIN, 0 };
         int ret = poll(&pfd, 1, timeout_ms);
         if (ret < 0)
@@ -141,7 +143,7 @@ int main(int argc, char *argv[])
         ssize_t written = dev_obj.write(msg);
         printf("  Written %zd bytes\n", written);
 
-        if (dev_obj.poll_readable(500)) {
+        if (dev_obj.poll_readable(kRoundtripPollMs)) {
             auto got = dev_obj.read();
             printf("  Read back: [%s]\n", got.c_str());
             assert(got == msg && "round-trip mismatch");
