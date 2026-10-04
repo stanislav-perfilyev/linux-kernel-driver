@@ -10,7 +10,7 @@ jobs:
     name: Build userspace clients
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -33,7 +33,7 @@ jobs:
     name: Kernel module syntax check
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install kernel headers
         run: |
